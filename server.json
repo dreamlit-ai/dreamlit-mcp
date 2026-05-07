@@ -1,0 +1,17 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "ai.dreamlit/mcp",
+  "title": "Dreamlit",
+  "description": "Create, test, publish, and manage Dreamlit notification workflows from AI clients.",
+  "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/dreamlit-ai/dreamlit-mcp",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.dreamlit.ai/mcp"
+    }
+  ]
+}
