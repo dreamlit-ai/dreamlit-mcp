@@ -1,0 +1,21 @@
+name: Validate
+
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+
+jobs:
+  validate-server-json:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Validate server.json
+        run: |
+          jq -e '
+            .name == "ai.dreamlit/mcp" and
+            .remotes[0].type == "streamable-http" and
+            .remotes[0].url == "https://mcp.dreamlit.ai/mcp"
+          ' server.json
