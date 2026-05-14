@@ -1,8 +1,8 @@
 # Dreamlit MCP
 
-Dreamlit MCP lets AI clients create, inspect, test, publish, and unpublish Dreamlit notification workflows.
+Dreamlit MCP lets AI clients create, inspect, test, publish, unpublish, analyze, and style Dreamlit notification workflows.
 
-Dreamlit is a database-driven notification workflow platform for Supabase and Postgres apps. Use this MCP server when you want an AI client to help build notification workflows from outcome-oriented prompts, then review and publish them through Dreamlit.
+Dreamlit is a database-driven notification workflow platform for Supabase and Postgres apps. Use this MCP server when you want an AI client to help build notification workflows from outcome-oriented prompts, review and publish them through Dreamlit, or answer bounded analytics questions about notification performance.
 
 ## Server
 
@@ -29,6 +29,12 @@ codex mcp add dreamlit --url https://mcp.dreamlit.ai/mcp
 codex mcp login dreamlit
 ```
 
+To request every supported v1 scope explicitly:
+
+```sh
+codex mcp login dreamlit --scopes workflows:read,workflows:write,workflows:publish,analytics:read
+```
+
 ### MCP Inspector
 
 ```sh
@@ -43,14 +49,16 @@ https://mcp.dreamlit.ai/mcp
 
 ## Tools
 
-Dreamlit exposes workflow-level tools, not low-level graph editing APIs.
+Dreamlit exposes product-level workflow and analytics tools, not low-level graph editing or database APIs.
 
 | Tool | Scope | Purpose |
 | --- | --- | --- |
 | `get_status` | `workflows:read` | Get Dreamlit guidance, workspace context, project setup, schema hints, workflow state, and app URLs. |
 | `list_projects` | `workflows:read` | Find accessible Dreamlit projects in the approved workspace. |
 | `list_workflows` | `workflows:read` | Find workflows in a project by name, description, trigger type, and pagination. |
+| `list_brand_kits` | `workflows:read` | Find saved brand kit ids and style summaries with pagination before applying one to generated email drafts. |
 | `get_workflow_and_preview_url` | `workflows:read` | Inspect a workflow draft and get the Dreamlit preview or builder URL before editing or publishing. |
+| `get_analytics` | `analytics:read` | Query bounded notification analytics, recipient engagement, and workflow run data with filters and cursor pagination. |
 | `create_or_update_workflow` | `workflows:write` | Create a new workflow draft or update an existing draft from a natural-language prompt. |
 | `send_workflow_test` | `workflows:write` | Confirm and send a draft email or Slack test without publishing the workflow. |
 | `prepare_publish` | `workflows:publish` | Validate a workflow before publishing and return confirmation fields. |
@@ -61,10 +69,12 @@ Dreamlit exposes workflow-level tools, not low-level graph editing APIs.
 
 1. Call `get_status` first to understand the workspace, project setup, and prompting guidance.
 2. Use `list_projects` and `list_workflows` if the user names a project or workflow without IDs.
-3. Use `get_workflow_and_preview_url` before editing an existing workflow.
-4. Use `create_or_update_workflow` to create or update a draft.
-5. Open the returned preview or builder URL and send workflow tests for important email or Slack messages.
-6. Publish only after explicit user confirmation, using `prepare_publish` followed by `confirm_publish`.
+3. Use `list_brand_kits` when the user wants a specific saved brand kit applied to generated email drafts.
+4. Use `get_workflow_and_preview_url` before editing an existing workflow.
+5. Use `get_analytics` for bounded analytics questions, filtering first and paginating with returned cursors for larger result sets.
+6. Use `create_or_update_workflow` to create or update a draft.
+7. Open the returned preview or builder URL and send workflow tests for important email or Slack messages.
+8. Publish only after explicit user confirmation, using `prepare_publish` followed by `confirm_publish`.
 
 Drafts are not live after authoring. Publishing is always a separate explicit step.
 
@@ -102,12 +112,15 @@ Available scopes:
 - `workflows:read`
 - `workflows:write`
 - `workflows:publish`
+- `analytics:read`
 
-Use the least privilege that fits the client. Read-only clients should request only `workflows:read`.
+Use the least privilege that fits the client. Read-only workflow and brand-kit clients should request only `workflows:read`; analytics clients should request `analytics:read`.
 
 ## Data Handling
 
-Dreamlit MCP can access workflow metadata and connected project context needed to perform the requested workflow actions. It does not require clients to send database credentials through MCP.
+Dreamlit MCP can access workflow metadata, saved brand kit summaries, connected project context, and bounded analytics results needed to perform the requested actions. It does not require clients to send database credentials through MCP.
+
+Analytics access is structured and paginated. Use filters and cursors for larger result sets; CSV exports and bulk dumps are not exposed through MCP.
 
 Do not paste secrets, raw credentials, or private tokens into prompts. Use Dreamlit's app settings for integrations and credentials.
 
